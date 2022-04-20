@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="catprofileMapper">
+	
+	<resultMap type="CatProfile" id="resultCatProfile">
+		<result column="user_id" property="user_id" />
+		<result column="cat_name" property="cat_name" />
+		<result column="breed" property="breed" />
+		<result column="age" property="age" />
+		<result column="stature" property="stature" />
+		<result column="weight" property="weight" />
+		<result column="neutering" property="neutering" />
+		<result column="cat_original_img" property="cat_original_img" />
+		<result column="cat_rename_img" property="cat_rename_img" />
+		<result column="repeat_number" property="repeat_number" />
+		<result column="measure_value" property="measure_value" />
+	</resultMap>
+	<!--
+	<select id="selectCatAllList" parameterType="CatProfile" resultMap="resultList">
+		select distinct cat_name from catprofile where user_id = #{ user_id };
+	</select>
+	 -->
+	<select id="selectCatOneCount" parameterType="CatProfile" resultType="_int">
+		select count(user_id) from catprofile 
+		where user_id = #{ user_id } and cat_name = #{ cat_name } 
+	</select>
+	<!--
+	<select id="selectCatOneProfile" parameterType="CatProfile" resultMap="resultList">
+		select * from catprofile 
+		where user_id = #{ user_id } and cat_name = #{ cat_name } 
+	</select>
+	-->
+	<insert id="insertCatProfile" parameterType="CatProfile">
+		insert into catprofile (user_id, cat_name, breed, age, stature, weight, neutering, cat_original_img, cat_rename_img, repeat_number, measure_value)
+		values (#{ user_id }, #{ cat_name }, #{ breed }, #{ age }, #{ stature }, #{ weight }, #{ neutering }, #{ cat_original_img }, #{ cat_rename_img }, #{ repeat_number }, #{ measure_value })
+	</insert>
+	
+	<delete id="deleteCatProfile" parameterType="_int">
+		delete from catprofile
+		where user_id = #{ user_id } and cat_name = #{ cat_name }
+	</delete>
+
+
+
+</mapper>

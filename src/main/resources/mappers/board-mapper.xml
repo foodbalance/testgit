@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="boardMapper">
+<!-- 컬럼명 디비와 일치해야함!! -->
+	<resultMap type="Board" id="resultBoard">
+		<id column="board_no" property="board_no" />
+		<result column="board_title" property="board_title" />
+		<result column="user_id" property="user_id" />
+		<result column="board_content" property="board_content" />
+		<result column="board_original_img" property="board_original_img" />
+		<result column="board_rename_img" property="board_rename_img" />
+		<result column="board_date" property="board_date" />
+		<result column="board_readcount" property="board_readcount" />
+	</resultMap>
+	
+	<resultMap id="resultTop3" type="Board">
+		<result property="board_no" column="board_no"/>
+		<result property="board_title" column="board_title"/>
+		<result property="board_readcount" column="board_readcount"/>
+	</resultMap>
+
+	<!-- 총 개시글 갯수 -->
+	<select id="getListCount" resultType="_int">
+		select count(*) from board
+	</select>
+	
+	<!-- 개시글 출력 -->
+	<select id="selectList" parameterType="Paging" resultMap="resultBoard">
+		<![CDATA[
+			SELECT *  
+			FROM (SELECT ROWNUM RNUM, BOARD_NO, BOARD_TITLE, user_id,   
+			               BOARD_CONTENT, BOARD_ORIGINAL_img,  
+			               BOARD_RENAME_img, BOARD_DATE,BOARD_READCOUNT  
+			       FROM (select * from board order by board_no desc))
+			where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+	</select>
+	
+	
+	<!-- 글 등록 -->
+	<insert id="insertOriginBoard" parameterType="Board" >
+		insert into board 	(board_no, user_id, board_title, 
+				board_content, board_date, board_readcount, board_original_img, 
+				board_rename_img)	
+		values ((select max(board_no) + 1 from board), #{user_id},
+				#{board_title}, #{board_content}, sysdate, 0,
+				#{board_original_img}, #{board_rename_img})		
+	</insert>
+	
+	<!-- 글 상세 조회 -->
+	<select id="selectBoard" parameterType="int" resultMap="resultBoard">
+		select * from board 
+		where board_no = #{board_no}
+	</select>	
+
+	<!-- 글 상세 조회시 카운트 증가 -->
+	<update id="addReadCount" parameterType="_int">
+		update board 
+		set board_readcount = board_readcount + 1 
+		where board_no = #{board_no}
+	</update>
+	
+	<!-- 글 수정 -->
+	<update id="updateOrigin" parameterType="Board">
+		update board 
+		set board_title = #{board_title}, 
+			board_content = #{board_content}	
+			<if test="board_original_img != null">
+			, 
+			board_original_img = #{board_original_img}, 
+			board_rename_img = #{board_rename_img} 
+			</if>
+			<if test="board_original_img == null">
+			, 
+			board_original_img = null, 
+			board_rename_img = null 
+			</if>
+		where board_no = #{board_no}
+	</update> 
+	
+	<!-- 글 삭제 -->
+	<delete id="deleteBoard" parameterType="Board">
+		delete from board 
+	 	where board_no = #{board_no}
+	</delete>
+
+	<!-- 제목으로 검색 -->
+	<select id="searchTitle" parameterType="string" resultMap="resultBoard">
+		select * from board
+		where board_title like '%' || #{ keyword } || '%'
+		order by board_no desc
+	</select>
+	
+	<!-- 작성자로 검색 -->
+	<select id="searchWriter" parameterType="string" resultMap="resultBoard">
+		select * from board
+		where user_id like '%' || #{ keyword } || '%'
+		order by board_no desc
+	</select>
+	
+	<!-- 날짜로 검색 -->
+ 	<select id="searchDate" parameterType="SearchDate" resultMap="resultBoard">
+		select * from board
+		where board_date between #{ begin } and #{ end }
+		order by board_no desc
+	</select>
+	
+	<!-- 게시글 3개 출력 -->
+	<select id="selectTop3" resultMap="resultTop3">
+		<![CDATA[
+		SELECT *  
+		FROM (SELECT ROWNUM RNUM, BOARD_NO, 
+					 BOARD_TITLE, BOARD_READCOUNT  
+		       FROM (SELECT * FROM BOARD
+		              ORDER BY BOARD_READCOUNT DESC))  
+		WHERE RNUM >= 1 AND RNUM <= 3
+		]]>
+	</select>
+
+</mapper>

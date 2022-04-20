@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="memberMapper">
+	
+	<resultMap id="resultList" type="Member">
+		<result property="user_id" column="user_id" />
+		<result property="user_pwd" column="user_pwd" />
+		<result property="user_name" column="user_name" />
+		<result property="user_birth" column="user_birth" />
+		<result property="phone" column="phone" />
+		<result property="address" column="address" />
+		<result property="keyword" column="keyword" />
+		<result property="admin_ok" column="admin_ok" />
+		<result property="login_ok" column="login_ok" />
+		<result property="login_stack" column="login_stack" />
+		<result property="postcode" column="postcode" />
+		<result property="address1" column="address1" />
+		<result property="address2" column="address2" />
+	</resultMap>
+		
+
+	<select id="selectLogin" parameterType="string" resultType="Member">
+		select * from member 	
+		where user_id = #{ user_id }
+	</select>
+	
+	<update id="updatePwdEncoding" parameterType="Member">
+		update member 
+		set user_pwd = #{ user_pwd } 
+		where user_id = #{ user_id }
+	</update>
+	
+	<update id="updateLoginStack" parameterType="Member">
+		update member 
+		set login_stack = #{ login_stack } 
+		where user_id = #{ user_id }
+	</update>
+	
+	<update id="updateLoginOk" parameterType="Member">
+		update member 
+		set login_ok = #{ login_ok } 
+		where user_id = #{ user_id }
+	</update>
+
+	<select id="selectCheckId" parameterType="string" resultType="_int">
+		select count(user_id) 
+		from member 
+		where user_id = #{ user_id }	
+	</select>
+	
+	<insert id="insertMember" parameterType="Member">
+		insert into member (user_id, user_pwd, user_name, 
+		user_birth, phone, address, keyword, admin_ok, login_ok, login_stack, postcode, address1, address2)
+		values (#{ user_id }, #{ user_pwd }, #{ user_name }, 
+		#{ user_birth }, #{ phone }, #{ address }, #{ keyword }, 'N', 'Y', 0, #{ postcode }, #{ address1 }, #{ address2 })
+	</insert>
+	
+	<select id="selectMember" parameterType="string" resultType="Member">
+		select * from member 	
+		where user_id = #{ user_id }	
+	</select>
+	
+	<update id="findPwd" parameterType="Member">
+		update member 
+		set user_pwd = #{ user_pwd } 	
+		where user_id = #{ user_id }
+	</update>
+	
+	<update id="updateMember" parameterType="Member">
+		update member 
+		set user_pwd = #{ user_pwd},
+			user_name = #{ user_name }, 			
+			user_birth = #{ user_birth }, 
+			phone = #{ phone }, address = #{ address }, postcode = #{ postcode }, 
+			address1 = #{ address1 }, address2 = #{ address2 } 
+		where user_id = #{ user_id }
+	</update>
+	
+	<delete id="deleteMember" parameterType="string">
+		delete from member where user_id = #{ user_id }
+	</delete>
+	
+	<select id="selectList" parameterType="Paging" resultMap="resultList">
+		<![CDATA[
+			SELECT *  
+			FROM (SELECT ROWNUM RNUM, user_id, user_pwd, user_name,   
+			               user_birth, phone, address, keyword,
+			               admin_ok, login_ok, login_stack, postcode, address1, address2
+			       FROM (SELECT * FROM MEMBER order by user_id desc))
+			where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="selectSearchLoginOk" parameterType="Object" resultMap="resultList">
+		<![CDATA[
+			SELECT *  
+			FROM (SELECT ROWNUM RNUM, user_id, user_pwd, user_name,   
+			               user_birth, phone, address, keyword,
+			               admin_ok, login_ok, login_stack, postcode, address1, address2
+			       FROM (SELECT * FROM MEMBER where login_ok like '%' || #{ keyword } || '%'))
+			where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>		
+	</select>
+	
+	<select id="selectSearchUserid" parameterType="string" resultMap="resultList">
+		select * from member 
+		where user_id like '%' || #{ keyword } || '%' 		
+	</select>
+
+	<select id="getListCount" resultType="_int">
+		select count(*) from member
+	</select>
+	
+	<select id="searchId" parameterType="Object" resultMap="resultList">
+		<![CDATA[
+			SELECT *  
+			FROM (SELECT ROWNUM RNUM, user_id, user_pwd, user_name,   
+			               user_birth, phone, address, keyword,
+			               admin_ok, login_ok, login_stack, postcode, address1, address2
+			       FROM (SELECT * FROM MEMBER where user_id like '%' || #{ keyword } || '%'))
+			where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<select id="searchListCount" resultType="_int" parameterType="string">
+		select count(*) from member
+		where user_id like '%' || #{ keyword} || '%'
+	</select>
+	
+	<select id="searchOkListCount" resultType="_int" parameterType="string">
+		select count(*) from member
+		where login_ok like '%' || #{ keyword} || '%'
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

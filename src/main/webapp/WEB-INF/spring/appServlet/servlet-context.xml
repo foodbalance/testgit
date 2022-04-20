@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	servlet에 대한 context 설정을 작성하며, 
+	Controllers, HandlerMapping, ViewResolver와 같은 웹과 연관되어 있는 bean들을 정의하게 된다.
+	servlet context에서 root context에 등록된 bean들에 대한 참조가 가능하지만, 
+	root context에서 servlet context에 등록된 bean들에 대한 참조는 불가능하다.
+ -->
+ <!-- 
+	servlet-context에 등록되는 빈들은 해당 컨테스트에서만 사용할 수 있습니다.
+	DispatcherServlet이 직접 사용하는 컨트롤러를 포함한 웹 관련 빈을 등록하는 데 사용합니다.
+	독자적인 컨텍스트들을 가지며, root-context 내 빈 사용이 가능합니다. 
+-->
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+		<beans:property name="order" value="1" />
+	</beans:bean>
+	
+	<!-- 컨트롤러가 리턴한 json 객체 출력용 뷰 클래스 등록해야 함
+	    메이븐의 dependency 로 다운받은 라이브러리가 제공하는 클래스임 -->
+	<beans:bean id="jsonView"
+		        class="net.sf.json.spring.web.servlet.view.JsonView">
+	</beans:bean>
+
+	<!-- 파일 다운을 위한 뷰클래스 실행하는 뷰리졸버 등록 
+		  주의 : id 속성을 지정하지 않는다.
+		  여러개의 뷰리졸버를 지정할 때는 실행 순서를 정해야 함
+		  파일 다운용 뷰리졸버가 반드시 맨처음 실행되게 순서를 지정해야 함
+		  컴트롤러 메소드가 리턴하는 뷰이름과 일치하는 뷰클래스가 있으면
+		  자동으로 해당 뷰클레스를 실행하게 됨-->
+	<beans:bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<beans:property name="order" value="0" />
+		<!-- 제일 먼저 실행되도록 순서 지정함 -->
+	</beans:bean>
+	<!-- 파일 업로드용 클레스 등록 : 업로드시 파일 전송 용량 제한 설정 -->
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="maxUploadSize" value="10000000"></beans:property>
+	</beans:bean>
+	
+	<context:component-scan base-package="com.project.cat" />
+	
+	<!-- <beans:bean id="memberService" class="com.test.first.member.model.service.MemberServiceImpl" /> -->
+	
+	
+</beans:beans>

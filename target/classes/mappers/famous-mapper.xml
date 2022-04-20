@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper PUBLIC
+"-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="famousMapper">
+	
+	<resultMap type="Famous" id="resultFamous">
+		<id column="user_id" property="user_id" />
+		<result column="register_num" property="register_num" />
+		<result column="cat_original_img" property="cat_original_img" />
+		<result column="cat_rename_img" property="cat_rename_img" />
+		<result column="cat_name" property="cat_name" />
+		<result column="cat_explain" property="cat_explain" />
+	</resultMap>
+
+	<select id="getListCount" resultType="_int">
+		select count(*) from famous
+	</select>	
+	
+	<select id="selectList" 
+	parameterType="Paging" resultMap="resultFamous">
+		<![CDATA[
+			SELECT *  
+			FROM (SELECT ROWNUM RNUM, USER_ID, REGISTER_NUM, CAT_ORIGINAL_IMG,   
+			               CAT_RENAME_IMG, CAT_NAME, CAT_EXPLAIN
+			       FROM (SELECT * FROM FAMOUS ORDER BY REGISTER_NUM ASC))  
+			where rnum >= #{startRow} and rnum <= #{endRow}
+		]]>
+	</select>
+	
+	<insert id="insertOriginFamous" parameterType="Famous" >
+		insert into famous 	(USER_ID, REGISTER_NUM, CAT_ORIGINAL_IMG,   
+			               CAT_RENAME_IMG, CAT_NAME, CAT_EXPLAIN)	
+		values ((select max(REGISTER_NUM) + 1 from famous), 
+				#{user_id}, #{register_num}, #{cat_name}, 
+				#{cat_original_img}, #{cat_rename_img}, #{cat_explain},
+				1, 
+				(select max(register_num) + 1 from famous), 
+				default, default, default)		
+	</insert>
+
+	<select id="selectFamous" parameterType="int" resultMap="resultFamous">
+		select * from famous 
+		where register_num = #{register_num}
+	</select>	
+	
+	<delete id="deleteFamous" parameterType="_int">
+		delete from famous
+		where register_num = #{ register_num }
+	</delete>
+	
+	<!-- <update id="updateOriginFamous" parameterType="Famous">
+		update famous
+		set cat_name = #{cat_name}, 
+			cat_explain = #{cat_explain}
+		where register_num = #{register_num}
+	</update> -->
+	
+	<update id="updateOriginFamous" parameterType="Famous">
+		update famous 
+		set cat_name = #{cat_name}, 
+			cat_explain = #{cat_explain}
+			<if test="famous_cat_original_img != null">
+			, 
+			famous_cat_original_img = #{famous_cat_original_img}, 
+			famous_cat_rename_img = #{famous_cat_rename_img} 
+			</if>
+			<if test="famous_cat_original_img == null">
+			, 
+			famous_cat_original_img = null, 
+			famous_cat_rename_img = null 
+			</if>
+		where register_num = #{register_num}
+	</update>
+	
+</mapper>
