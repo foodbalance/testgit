@@ -615,7 +615,7 @@ public class MemberController {
     }
     
     
-	
+	//깃 테스트용 주석
 	
 	
 	
